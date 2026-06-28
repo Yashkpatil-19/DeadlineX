@@ -3,6 +3,7 @@ import VoiceAssistant from './VoiceAssistant';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import UserGuideOverlay from './UserGuideOverlay';
+import { Analytics } from '@vercel/analytics/react';
 
 const TaskDashboard = () => {
     // Pre-populate with beautiful, theme-appropriate initial tasks
@@ -1038,6 +1039,9 @@ const TaskDashboard = () => {
                 isOpen={showOnboarding} 
                 onClose={() => setShowOnboarding(false)} 
             />
+            
+            {/* Vercel Web Analytics */}
+            <Analytics />
         </div>
     );
 };
