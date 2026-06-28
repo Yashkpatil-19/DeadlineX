@@ -261,7 +261,7 @@ const VoiceAssistant = ({ userId = "default-user" }) => {
 
             {/* Usage Tip */}
             <p className="mt-4 text-[10px] text-slate-500 text-center leading-normal">
-                Try: "Add exam prep with 5 days remaining" or "Update task progress by 15 percent".
+                {"Try: \"Add exam prep with 5 days remaining\" or \"Update task progress by 15 percent\"."}
             </p>
         </div>
     );

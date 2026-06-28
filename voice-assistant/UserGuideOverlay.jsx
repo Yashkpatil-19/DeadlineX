@@ -272,11 +272,11 @@ const UserGuideOverlay = ({ isOpen, onClose }) => {
                     {/* Speech bubbles */}
                     {/* User bubble left-top */}
                     <rect x="15" y="15" width="70" height="18" rx="6" fill="#1e293b" />
-                    <text x="21" y="26" fill="#94a3b8" fontSize="6.5">"I have an exam in 10 days"</text>
+                    <text x="21" y="26" fill="#94a3b8" fontSize="6.5">{"\"I have an exam in 10 days\""}</text>
                     
                     {/* Assistant response right-bottom */}
                     <rect x="105" y="85" width="80" height="18" rx="6" fill="#064e3b" stroke="#10b981" strokeWidth="0.5" />
-                    <text x="111" y="96" fill="#34d399" fontSize="6.5">"Analyzing workload... Roadmap active."</text>
+                    <text x="111" y="96" fill="#34d399" fontSize="6.5">{"\"Analyzing workload... Roadmap active.\""}</text>
 
                     {/* Mic button glow */}
                     <circle cx="100" cy="60" r="14" fill="#042f2e" stroke="#10b981" strokeWidth="1" filter="url(#emeraldGlow)" />
