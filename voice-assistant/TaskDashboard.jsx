@@ -4,6 +4,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieC
 import { motion, AnimatePresence } from 'framer-motion';
 import UserGuideOverlay from './UserGuideOverlay';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 const TaskDashboard = () => {
     // Pre-populate with beautiful, theme-appropriate initial tasks
@@ -1042,6 +1043,9 @@ const TaskDashboard = () => {
             
             {/* Vercel Web Analytics */}
             <Analytics />
+            
+            {/* Vercel Speed Insights */}
+            <SpeedInsights />
         </div>
     );
 };
