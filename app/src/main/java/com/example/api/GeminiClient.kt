@@ -99,7 +99,7 @@ object GeminiClient {
             }
         """.trimIndent()
 
-        val systemPrompt = "You are Deadline Guardian AI, an autonomous task manager that evaluates priorities based on urgency, scope, importance, and difficulty."
+        val systemPrompt = "You are DeadlineX, an autonomous task manager that evaluates priorities based on urgency, scope, importance, and difficulty."
         val jsonResponse = queryGemini(prompt, systemPrompt)
 
         val result = JsonParser.fromJson<PriorityResult>(jsonResponse)
@@ -167,7 +167,7 @@ object GeminiClient {
             ]
         """.trimIndent()
 
-        val systemPrompt = "You are Deadline Guardian AI, an expert strategic planner that breaks down complex task names into simple-to-advanced roadmaps using extremely plain language and recommending AI rating tools."
+        val systemPrompt = "You are DeadlineX, an expert strategic planner that breaks down complex task names into simple-to-advanced roadmaps using extremely plain language and recommending AI rating tools."
         val jsonResponse = queryGemini(prompt, systemPrompt)
 
         val result = JsonParser.fromJsonList(jsonResponse, SubTask::class.java)
@@ -227,7 +227,7 @@ object GeminiClient {
             }
         """.trimIndent()
 
-        val systemPrompt = "You are Deadline Guardian AI's risk-analyzer, warning users of dangerous deadline slippages and offering high-impact rescue suggestions."
+        val systemPrompt = "You are DeadlineX's risk-analyzer, warning users of dangerous deadline slippages and offering high-impact rescue suggestions."
         val jsonResponse = queryGemini(prompt, systemPrompt)
 
         val result = JsonParser.fromJson<RiskResult>(jsonResponse)
@@ -286,7 +286,7 @@ object GeminiClient {
             }
         """.trimIndent()
 
-        val systemPrompt = "You are Deadline Guardian AI in emergency response mode. You deliver uncompromising, high-impact, military-grade productivity rescue plans."
+        val systemPrompt = "You are DeadlineX in emergency response mode. You deliver uncompromising, high-impact, military-grade productivity rescue plans."
         val jsonResponse = queryGemini(prompt, systemPrompt)
 
         val result = JsonParser.fromJson<EmergencyPlan>(jsonResponse)

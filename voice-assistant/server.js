@@ -2,11 +2,28 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const { checkTaskRiskStatus } = require('./services/riskWatch');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Graceful Mongoose Connection with sandbox failover support
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/deadline_guardian';
+mongoose.connect(MONGODB_URI)
+    .then(() => console.log('✓ MongoDB connection successfully established.'))
+    .catch(err => {
+        console.warn('⚠️ MongoDB connection deferred. Running with in-memory persistence fallback:');
+        console.warn(err.message);
+    });
+
+// Register routers
+const voiceRouter = require('./routes/voice');
+const calendarRouter = require('./routes/calendar');
+
+app.use('/api/voice', voiceRouter);
+app.use('/api/calendar', calendarRouter);
 
 const server = http.createServer(app);
 const io = socketIo(server, {

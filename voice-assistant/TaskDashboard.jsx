@@ -3,7 +3,11 @@ import VoiceAssistant from './VoiceAssistant';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import UserGuideOverlay from './UserGuideOverlay';
-import { Analytics } from '@vercel/analytics/react';
+import CalendarView from './CalendarView';
+import LandingPage from './LandingPage';
+import AuthPortal from './AuthPortal';
+import AppLayout from './AppLayout';
+import { useRiskAlerts } from './hooks/useRiskAlerts';
 
 const TaskDashboard = () => {
     // Pre-populate with beautiful, theme-appropriate initial tasks
@@ -102,10 +106,58 @@ const TaskDashboard = () => {
     // Onboarding guide state
     const [showOnboarding, setShowOnboarding] = useState(false);
 
+    // Calendar Integration View Toggle State
+    const [activeView, setActiveView] = useState('dashboard');
+
+    // SaaS Portal & Protected shell states
+    const [isLoggedIn, setIsLoggedIn] = useState(() => {
+        return localStorage.getItem('deadlinex_auth_user') !== null;
+    });
+    const [currentMainPage, setCurrentMainPage] = useState(() => {
+        return localStorage.getItem('deadlinex_auth_user') !== null ? 'app' : 'landing';
+    });
+    const [activeTab, setActiveTab] = useState('dashboard');
+    const [broadcastNotifications, setBroadcastNotifications] = useState([
+        { type: 'SYSTEM SUCCESS', message: 'DeadlineX AI Core successfully established secure channel.', time: '5m ago' },
+        { type: 'RISK WARN', message: 'Math Exam Prep backlog pressure is elevated. Consider starting Chapter 3 review.', time: '1h ago' }
+    ]);
+
+    // Connect real-time Socket.io risk alerts
+    useRiskAlerts(isLoggedIn ? 'premium-web-user' : null, window.location.origin, (alertData) => {
+        setBroadcastNotifications(prev => [
+            {
+                type: 'CRITICAL THREAT',
+                message: alertData.message,
+                time: 'Just now'
+            },
+            ...prev
+        ]);
+    });
+
+    const handleLoginSuccess = (email) => {
+        setIsLoggedIn(true);
+        setCurrentMainPage('app');
+        setActiveTab('dashboard');
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('deadlinex_auth_user');
+        setIsLoggedIn(false);
+        setCurrentMainPage('landing');
+        setActiveTab('dashboard');
+    };
+
     useEffect(() => {
         const hasSeen = localStorage.getItem('hasSeenOnboarding');
         if (!hasSeen) {
             setShowOnboarding(true);
+        }
+
+        // Auto-navigate to calendar if redirected back from Google OAuth
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('calendar_connected') === 'true') {
+            setActiveView('calendar');
+            setActiveTab('calendar');
         }
     }, []);
 
@@ -150,7 +202,7 @@ const TaskDashboard = () => {
         if (!("Notification" in window)) return;
         if (Notification.permission !== "granted") return;
 
-        const title = `🚨 Deadline Guardian: Urgent Alert`;
+        const title = `🚨 DeadlineX: Urgent Alert`;
         const options = {
             body: `"${task.title}" is due in ${task.daysRemaining} days/hours (Progress: ${task.progress}%). Take action now!`,
             requireInteraction: true
@@ -206,7 +258,7 @@ const TaskDashboard = () => {
         if (permission === "granted") {
             setNotificationsEnabled(true);
             try {
-                new Notification("🔔 Deadline Guardian Alert System", {
+                new Notification("🔔 DeadlineX Alert System", {
                     body: "Notifications enabled! You will now receive desktop alerts for tasks with less than 24 hours left.",
                     requireInteraction: false
                 });
@@ -378,35 +430,311 @@ const TaskDashboard = () => {
         statusPieData.push({ name: 'No Tasks', value: 1, color: '#1e293b' });
     }
 
-    return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-4 md:p-8">
-            <div className="max-w-7xl mx-auto">
-                {/* Dashboard Header */}
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-slate-800 pb-6 gap-4">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
-                            <span className="text-xs font-bold font-mono tracking-widest text-cyan-400 uppercase">System Active</span>
-                        </div>
-                        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-                            Deadline Guardian AI
-                        </h1>
-                        <p className="text-slate-400 text-sm mt-1">
-                            Strategic workspace designed with premium automated roadmaps and real-time priorities.
+    // Render public pages or protect the dashboard workspace
+    if (currentMainPage === 'landing') {
+        return <LandingPage onJoin={() => setCurrentMainPage('auth')} />;
+    }
+
+    if (currentMainPage === 'auth') {
+        return (
+            <AuthPortal 
+                onLogin={handleLoginSuccess} 
+                onBackToLanding={() => setCurrentMainPage('landing')} 
+            />
+        );
+    }
+
+    // AI Planner View Screen Component
+    const renderAIPlanner = () => (
+        <div className="bg-slate-900 border border-slate-800/80 p-8 rounded-3xl space-y-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div className="space-y-2 border-b border-slate-800 pb-6">
+                <span className="text-[10px] font-mono tracking-widest text-cyan-400 font-bold uppercase">&gt; CORE MODULES / AUTOMATION</span>
+                <h3 className="text-2xl font-black font-mono uppercase tracking-wide">Autonomous AI Planner Matrix</h3>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                    Formulate multi-day target goals. Our cognitive AI breakdown engine decomposes targets into progressive tactical milestones instantly.
+                </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Form Input Control */}
+                <div className="lg:col-span-1 bg-slate-950/60 border border-slate-800/80 p-6 rounded-2xl space-y-4">
+                    <h4 className="text-xs font-bold font-mono tracking-wider text-slate-300 uppercase">AI PROSPECTUS SCOPE</h4>
+                    
+                    <div className="space-y-1.5">
+                        <label className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">Target Objective</label>
+                        <input
+                            type="text"
+                            placeholder="e.g., Build Ktor server with OAuth"
+                            className="w-full px-3 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500"
+                        />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">Decomposition Complexity</label>
+                        <select className="w-full px-3 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none">
+                            <option>STANDARD EXCURSION (3 DAYS)</option>
+                            <option>DEEP DIVE CADENCE (7 DAYS)</option>
+                            <option>DEFCON HIGH-INTENSITY SPRINT (1 DAY)</option>
+                        </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">Security Allocation Mode</label>
+                        <select className="w-full px-3 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none">
+                            <option>AUTOMATIC LOAD BALANCING</option>
+                            <option>HIGH INTENSITY OVERDRIVE</option>
+                            <option>COMPROMISE-FREE EXECUTION</option>
+                        </select>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => alert("Simulation: AI Roadmap generated successfully and queued inside your workspace.")}
+                        className="w-full py-3 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold font-mono tracking-widest text-[10px] rounded-xl uppercase hover:shadow-[0_0_10px_rgba(34,211,238,0.25)] transition-all"
+                    >
+                        ⚡ GENERATE AUTONOMOUS BLUEPRINT
+                    </button>
+                </div>
+
+                {/* Cascading Roadmap Showcase */}
+                <div className="lg:col-span-2 space-y-4">
+                    <h4 className="text-xs font-bold font-mono tracking-wider text-slate-300 uppercase">ACTIVE COGNITIVE ROADMAP SIMULATION</h4>
+                    
+                    <div className="space-y-3">
+                        {[
+                            { step: "01", title: "Project Scoping & Schema Normalization", desc: "Define entities and primary tables for database synchronizer.", duration: "3h", state: "COMPLETED", progress: 100 },
+                            { step: "02", title: "Implement Ktor Router & Callbacks", desc: "Build endpoints for secure OAuth parameters verification.", duration: "5h", state: "IN PROGRESS", progress: 40 },
+                            { step: "03", title: "Setup Socket.io Live Stream Client", desc: "Establish low-latency pipeline to transmit delivery threats.", duration: "4h", state: "PENDING", progress: 0 },
+                            { step: "04", title: "End-To-End Screenshot Validation", desc: "Execute automated local Roborazzi unit verification tests.", duration: "2h", state: "PENDING", progress: 0 }
+                        ].map((milestone, idx) => (
+                            <div key={idx} className="bg-slate-950/40 border border-slate-850/60 p-4 rounded-xl flex items-start gap-4">
+                                <span className="text-lg font-black font-mono text-cyan-400">{milestone.step}</span>
+                                <div className="flex-grow space-y-1">
+                                    <div className="flex items-center justify-between">
+                                        <h5 className="text-xs font-bold font-mono text-slate-200">{milestone.title}</h5>
+                                        <span className={`text-[8px] font-mono font-bold px-2 py-0.5 rounded border ${
+                                            milestone.state === 'COMPLETED' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
+                                            milestone.state === 'IN PROGRESS' ? 'bg-indigo-950/40 text-indigo-400 border-indigo-500/20' : 'bg-slate-900 text-slate-500 border-slate-800'
+                                        }`}>{milestone.state}</span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-400 leading-normal">{milestone.desc}</p>
+                                    <div className="flex items-center gap-3 pt-2">
+                                        <div className="flex-grow bg-slate-900 h-1 rounded-full overflow-hidden">
+                                            <div className="bg-cyan-400 h-full shadow-[0_0_8px_#22d3ee]" style={{ width: `${milestone.progress}%` }}></div>
+                                        </div>
+                                        <span className="text-[10px] font-mono text-slate-500">{milestone.duration}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    // Risk Analyzer Screen Component
+    const renderRiskAnalyzer = () => {
+        const highRiskTasks = tasks.filter(t => t.daysRemaining <= 3 && t.progress < 50);
+        return (
+            <div className="bg-slate-900 border border-slate-800/80 p-8 rounded-3xl space-y-8 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div className="space-y-2 border-b border-slate-800 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                        <span className="text-[10px] font-mono tracking-widest text-rose-400 font-bold uppercase">&gt; CYBERNETIC RISK COEFICIENTS</span>
+                        <h3 className="text-2xl font-black font-mono uppercase tracking-wide">Predictive Risk Analyzer</h3>
+                        <p className="text-slate-400 text-xs leading-relaxed">
+                            Continuous delivery audit metrics checking task progress velocity against target milestones.
                         </p>
                     </div>
-                    <div className="flex items-center gap-3 w-full md:w-auto self-stretch md:self-auto justify-end">
-                        <button
-                            onClick={() => setShowOnboarding(true)}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-slate-900/60 hover:bg-slate-850/80 border border-slate-800 hover:border-slate-700 active:bg-slate-950 text-xs font-bold font-mono text-cyan-400 hover:text-cyan-300 tracking-wider uppercase rounded-xl transition-all shadow-lg backdrop-blur-sm"
-                        >
-                            <span className="text-cyan-400 animate-pulse">💡</span> REPLAY GUIDE
-                        </button>
+                    <div className="bg-rose-950/40 border border-rose-500/20 px-4 py-3 rounded-2xl flex items-center gap-3 self-start md:self-auto">
+                        <span className="w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping"></span>
+                        <div>
+                            <span className="text-[9px] text-rose-400 font-mono font-bold block leading-none">THREAT LEVEL</span>
+                            <span className="text-xs font-mono font-black text-rose-300 uppercase">DEFCON 1 HIGH</span>
+                        </div>
                     </div>
-                </header>
+                </div>
 
-                {/* Dashboard Main Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                {/* Risk Metrics Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {[
+                        { label: "Overall Slippage Risk Coefficient", value: "14.8%", color: "text-amber-400", indicator: "STABLE" },
+                        { label: "Active Backlog Workload Pressure", value: "3.5 hrs/day", color: "text-rose-400", indicator: "HIGH PRESSURE" },
+                        { label: "Predictive Zero-Slippage Probability", value: "91.2%", color: "text-cyan-400", indicator: "EVALUATING" }
+                    ].map((m, idx) => (
+                        <div key={idx} className="bg-slate-950/60 border border-slate-805 p-5 rounded-2xl space-y-2">
+                            <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-wider block">{m.label}</span>
+                            <p className={`text-2xl font-black font-mono ${m.color}`}>{m.value}</p>
+                            <span className="inline-block text-[8px] font-mono bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded text-slate-400 uppercase tracking-widest">{m.indicator}</span>
+                        </div>
+                    ))}
+                </div>
+
+                {/* High-Risk Tasks Audit */}
+                <div className="space-y-4">
+                    <h4 className="text-xs font-bold font-mono tracking-wider text-slate-300 uppercase">HIGH-RISK DEADLINE AUDIT</h4>
+                    
+                    {highRiskTasks.length === 0 ? (
+                        <div className="bg-slate-950/40 border border-slate-850 p-8 rounded-2xl text-center space-y-2">
+                            <p className="text-3xl">🛡️</p>
+                            <p className="text-xs font-mono text-cyan-400 uppercase font-black">ZERO IMMINENT THREATS DETECTED</p>
+                            <p className="text-[10px] text-slate-500 max-w-sm mx-auto font-mono">All active roadmaps are tracking well inside expected delivery parameters.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {highRiskTasks.map((t) => (
+                                <div key={t.id} className="bg-slate-950/60 border border-rose-500/20 p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-bold font-mono text-slate-200">{t.title}</span>
+                                            <span className="text-[8px] font-mono font-bold bg-rose-950/50 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded uppercase">IMMINENT SLIPPAGE</span>
+                                        </div>
+                                        <p className="text-[11px] text-slate-400">{t.description}</p>
+                                    </div>
+                                    <div className="flex items-center gap-6">
+                                        <div className="text-right">
+                                            <span className="text-[9px] text-slate-500 font-mono block">DAYS REMAINING</span>
+                                            <span className="text-xs font-bold font-mono text-rose-400">{t.daysRemaining} days</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-[9px] text-slate-500 font-mono block">CURRENT PROGRESS</span>
+                                            <span className="text-xs font-bold font-mono text-slate-300">{t.progress}%</span>
+                                        </div>
+                                        <button
+                                            onClick={() => alert("Simulation: AI Emergency Mode Pomodoro sprint scheduled.")}
+                                            className="px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-slate-950 font-mono font-bold text-[10px] tracking-wider uppercase rounded-xl transition-all"
+                                        >
+                                            🚨 INITIATE EMERGENCY SPRINT
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    // Task History Component
+    const renderTaskHistory = () => {
+        const completedTasks = tasks.filter(t => t.progress === 100);
+        return (
+            <div className="bg-slate-900 border border-slate-800/80 p-8 rounded-3xl space-y-8 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div className="space-y-2 border-b border-slate-800 pb-6">
+                    <span className="text-[10px] font-mono tracking-widest text-indigo-400 font-bold uppercase">&gt; ARCHIVED AUDIT RECORDS</span>
+                    <h3 className="text-2xl font-black font-mono uppercase tracking-wide">Secure Task History Log</h3>
+                    <p className="text-slate-400 text-xs leading-relaxed">
+                        Historically completed or terminated roadmaps with focus performance audit logs.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {[
+                        { label: "Total Completed Roadmaps", value: completedTasks.length },
+                        { label: "Manual Terminations", value: "3" },
+                        { label: "Total Saved Focus Hours", value: `${completedTasks.length * 6} hrs` },
+                        { label: "Success Coefficient", value: "92.3%" }
+                    ].map((stat, idx) => (
+                        <div key={idx} className="bg-slate-950/40 border border-slate-850 p-4 rounded-xl text-center">
+                            <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-wider block">{stat.label}</span>
+                            <span className="text-xl font-mono font-black text-cyan-400 block mt-1">{stat.value}</span>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="space-y-4">
+                    <h4 className="text-xs font-bold font-mono tracking-wider text-slate-300 uppercase">SECURE TIMELINE TRANSCRIPT</h4>
+                    
+                    {completedTasks.length === 0 ? (
+                        <div className="bg-slate-950/40 border border-slate-850 p-8 rounded-2xl text-center space-y-2">
+                            <p className="text-3xl">📜</p>
+                            <p className="text-xs font-mono text-indigo-400 uppercase font-black">NO COMPLETED ROADMAP TIMELINES FOUND</p>
+                            <p className="text-[10px] text-slate-500 max-w-sm mx-auto font-mono">Complete milestones or subtasks inside your Dashboard to archive logs securely.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {completedTasks.map((t) => (
+                                <div key={t.id} className="bg-slate-950/50 border border-slate-850 p-5 rounded-2xl flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <h5 className="text-xs font-bold font-mono text-slate-200">{t.title}</h5>
+                                        <p className="text-[10px] text-slate-500 font-mono">ID: {t.id} &bull; Category: {t.category}</p>
+                                    </div>
+                                    <span className="text-[9px] font-mono font-bold bg-emerald-950/50 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-xl uppercase">
+                                        ✓ SECURED
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    // Keep activeView state and activeTab sidebar synchronized
+    useEffect(() => {
+        if (activeView === 'calendar') {
+            setActiveTab('calendar');
+        } else if (activeView === 'dashboard') {
+            setActiveTab('dashboard');
+        }
+    }, [activeView]);
+
+    return (
+        <AppLayout
+            activeTab={activeTab}
+            onTabChange={(tab) => {
+                setActiveTab(tab);
+                if (tab === 'calendar') {
+                    setActiveView('calendar');
+                } else {
+                    setActiveView('dashboard');
+                }
+            }}
+            onLogout={handleLogout}
+            notifications={broadcastNotifications}
+        >
+            <AnimatePresence mode="wait">
+                {activeTab === 'dashboard' && (
+                    <motion.div
+                        key="dashboard"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="space-y-8"
+                    >
+                        {/* Task Dashboard Main View Header */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-900 pb-6 gap-4">
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                                    <span className="text-[10px] font-bold font-mono tracking-widest text-cyan-400 uppercase">Autonomous Agent Online</span>
+                                </div>
+                                <h1 className="text-2xl font-black font-mono uppercase text-slate-100">Task Workspace Dashboard</h1>
+                                <p className="text-slate-400 text-xs">Manage active subtask roadmaps, strategic categories, and priority metrics.</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setShowOnboarding(true)}
+                                    className="flex items-center gap-2 px-4 py-2.5 bg-slate-900/60 hover:bg-slate-850/80 border border-slate-800 hover:border-slate-700 active:bg-slate-950 text-xs font-bold font-mono text-cyan-400 hover:text-cyan-300 tracking-wider uppercase rounded-xl transition-all shadow-md"
+                                >
+                                    💡 REPLAY GUIDE
+                                </button>
+                            </div>
+                        </div>
+
+                        {activeView === 'calendar' ? (
+                            <CalendarView userId="premium-web-user" onBack={() => setActiveView('dashboard')} />
+                        ) : (
+                            /* Dashboard Main Grid */
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                     
                     {/* Left Column (Forms & Control Panel) - Span 5 */}
                     <div className="lg:col-span-5 space-y-8">
@@ -1015,34 +1343,97 @@ const TaskDashboard = () => {
                                             </div>
 
                                             {/* Card Bottom Panel Actions */}
-                                            <div className="bg-slate-950/40 border-t border-slate-800/50 px-6 py-3.5 flex justify-between items-center">
+                                            <div className="bg-slate-950/40 border-t border-slate-800/50 px-6 py-3.5 flex justify-between items-center gap-4 flex-wrap">
                                                 <span className="text-[10px] text-slate-500 font-mono">ID: {task.id}</span>
-                                                <button 
-                                                    onClick={() => handleDeleteTask(task.id)}
-                                                    className="text-xs font-semibold text-rose-500 hover:text-rose-400 flex items-center gap-1 font-mono transition-all"
-                                                >
-                                                    ✕ TERMINATE ROADMAP
-                                                </button>
+                                                <div className="flex gap-4">
+                                                    <button 
+                                                        onClick={async () => {
+                                                            try {
+                                                                const res = await fetch('/api/calendar/schedule-task', {
+                                                                    method: 'POST',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({ userId: 'premium-web-user', taskId: task.id, subtasks: task.subtasks })
+                                                                });
+                                                                if (res.ok) {
+                                                                    setActiveView('calendar');
+                                                                } else {
+                                                                    throw new Error();
+                                                                }
+                                                            } catch (err) {
+                                                                setActiveView('calendar');
+                                                            }
+                                                        }}
+                                                        className="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-mono transition-all uppercase"
+                                                    >
+                                                        📅 Schedule On Calendar
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleDeleteTask(task.id)}
+                                                        className="text-xs font-semibold text-rose-500 hover:text-rose-400 flex items-center gap-1 font-mono transition-all"
+                                                    >
+                                                        ✕ TERMINATE ROADMAP
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     );
                                 })}
                             </div>
                         )}
-                    </div>
+                    </motion.div>
+                )}
 
-                </div>
-            </div>
+                {activeTab === 'planner' && (
+                    <motion.div
+                        key="planner"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                    >
+                        {renderAIPlanner()}
+                    </motion.div>
+                )}
+
+                {activeTab === 'calendar' && (
+                    <motion.div
+                        key="calendar"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                    >
+                        <CalendarView userId="premium-web-user" onBack={() => setActiveTab('dashboard')} />
+                    </motion.div>
+                )}
+
+                {activeTab === 'analyzer' && (
+                    <motion.div
+                        key="analyzer"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                    >
+                        {renderRiskAnalyzer()}
+                    </motion.div>
+                )}
+
+                {activeTab === 'history' && (
+                    <motion.div
+                        key="history"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                    >
+                        {renderTaskHistory()}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* User Onboarding Guide Overlay */}
             <UserGuideOverlay 
                 isOpen={showOnboarding} 
                 onClose={() => setShowOnboarding(false)} 
             />
-            
-            {/* Vercel Web Analytics */}
-            <Analytics />
-        </div>
+        </AppLayout>
     );
 };
 

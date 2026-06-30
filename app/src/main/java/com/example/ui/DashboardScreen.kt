@@ -96,7 +96,7 @@ fun DashboardScreen(
             ) {
                 Column {
                     Text(
-                        text = "DEADLINE GUARDIAN",
+                        text = "DEADLINEX",
                         color = NeonEmerald,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
@@ -888,7 +888,7 @@ fun DashboardScreen(
 
                         if (roadmapType == "AI") {
                             Text(
-                                text = "Deadline Guardian AI will automatically analyze your inputs and break down the task into an optimized day-by-day subtask roadmap.",
+                                text = "DeadlineX will automatically analyze your inputs and break down the task into an optimized day-by-day subtask roadmap.",
                                 color = TextSilver.copy(alpha = 0.7f),
                                 fontSize = 11.sp,
                                 style = MaterialTheme.typography.bodySmall,

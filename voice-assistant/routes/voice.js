@@ -42,7 +42,7 @@ router.post('/command', async (req, res) => {
         
         const ai = new GoogleGenAI({ apiKey });
 
-        const systemInstruction = `You are the AI Voice Controller for Deadline Guardian AI.
+        const systemInstruction = `You are the AI Voice Controller for DeadlineX.
 Analyze the user's transcript and map it to a specific intent (ADD_TASK, UPDATE_PROGRESS, RESCHEDULE_TASK, or GENERAL_QUERY).
 Provide a concise, speakable response (max 2 sentences) and extract the relevant fields for the action payload.
 

@@ -57,7 +57,7 @@ class GuardianRepository(
         val priorityResult = if (userPriority != null && userPriority != "AUTO") {
             val reasoningPrompt = "Explain in 2 short sentences why setting '$title' ($category, difficulty $difficulty/5, importance $importanceLevel/5) as $userPriority priority is logical. Description: $description"
             val aiReasoning = try {
-                val resp = GeminiClient.queryGemini(reasoningPrompt, "You are Deadline Guardian AI helper.")
+                val resp = GeminiClient.queryGemini(reasoningPrompt, "You are DeadlineX helper.")
                 // Strip off extra quotes or json braces if AI outputs raw text
                 resp.replace("\"", "").replace("{", "").replace("}", "").trim()
             } catch (e: Exception) {

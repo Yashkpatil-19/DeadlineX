@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en" class="dark h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeadlineX | Autonomous AI Productivity Agent</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#151f32',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                    },
+                },
+            },
+        }
+    </script>
+    <!-- Inter Font & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+        .glow-cyan {
+            text-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+        }
+        .glow-rose {
+            text-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-950 text-slate-100 antialiased" x-data="appState()">
+
+    <!-- 1. LANDING PAGE VIEW -->
+    <template x-if="page === 'landing'">
+        <div class="min-h-screen flex flex-col relative overflow-x-hidden selection:bg-cyan-500 selection:text-slate-900">
+            <!-- Background glows -->
+            <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+            <div class="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+            <!-- Header -->
+            <header class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-900 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-xl">🛡️</span>
+                    <div>
+                        <h1 class="text-sm font-black font-mono tracking-widest text-cyan-400">DEADLINEX</h1>
+                        <p class="text-[9px] text-slate-500 font-mono tracking-wider uppercase">Autonomous AI Productivity Agent</p>
+                    </div>
+                </div>
+                <button @click="page = 'auth'" class="px-4 py-2 bg-slate-900/60 hover:bg-slate-850 border border-slate-800 hover:border-cyan-500/30 text-[10px] font-bold font-mono text-cyan-400 tracking-wider uppercase rounded-xl transition-all shadow-md">
+                    LAUNCH PORTAL
+                </button>
+            </header>
+
+            <!-- Hero Section -->
+            <main class="flex-grow flex flex-col items-center px-6 py-12 md:py-24 max-w-7xl mx-auto w-full relative z-10 text-center space-y-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-cyan-950/40 border border-cyan-500/20 rounded-full text-[10px] font-bold font-mono tracking-wider text-cyan-400 uppercase">
+                    <span>🤖</span> COGNITIVE TIME PROTECTION PROTOCOL
+                </div>
+
+                <h2 class="text-4xl md:text-6xl font-black tracking-tight leading-tight uppercase font-mono">
+                    Deadline<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-400 to-indigo-400">X</span>
+                </h2>
+
+                <h3 class="text-lg md:text-xl text-slate-400 font-mono font-medium max-w-2xl mx-auto">
+                    The Autonomous AI Productivity Agent designed to calculate, adapt, and secure your schedules.
+                </h3>
+
+                <p class="text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
+                    Leverage the ultimate cybernetic scheduling interface. Auto-generate day-by-day subtask roadmaps, analyze delivery risk coefficients with real-time feedback, and secure your objectives.
+                </p>
+
+                <div class="pt-6">
+                    <button @click="page = 'auth'" class="group relative px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-bold font-mono tracking-widest text-xs rounded-2xl transition-all shadow-[0_0_30px_rgba(34,211,238,0.3)] hover:shadow-[0_0_40px_rgba(34,211,238,0.5)] active:scale-95 uppercase">
+                        <span class="relative z-10 flex items-center justify-center gap-2">
+                            Guard Your Deadlines Now <span>🛡️</span>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-5xl mt-16 md:mt-24 border border-slate-900 bg-slate-950/50 backdrop-blur-sm p-6 rounded-2xl">
+                    <div>
+                        <p class="text-2xl md:text-3xl font-black font-mono text-cyan-400">142,850+</p>
+                        <p class="text-[9px] uppercase font-bold tracking-wider text-slate-500 font-mono">Deadlines Secured</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl md:text-3xl font-black font-mono text-emerald-400">389,400+</p>
+                        <p class="text-[9px] uppercase font-bold tracking-wider text-slate-500 font-mono">AI Roadmaps Generated</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl md:text-3xl font-black font-mono text-indigo-400">95.4%</p>
+                        <p class="text-[9px] uppercase font-bold tracking-wider text-slate-500 font-mono">Risk Mitigation</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl md:text-3xl font-black font-mono text-rose-400">0%</p>
+                        <p class="text-[9px] uppercase font-bold tracking-wider text-slate-500 font-mono">Slippage Rate</p>
+                    </div>
+                </div>
+
+                <!-- Features Grid -->
+                <div class="w-full mt-24 space-y-8 text-left">
+                    <div class="text-center space-y-2">
+                        <h3 class="text-xs font-bold font-mono tracking-widest text-cyan-400 uppercase">COGNITIVE ENGINE CAPABILITIES</h3>
+                        <h2 class="text-2xl md:text-3xl font-black font-mono tracking-wide uppercase">AUTONOMOUS SCHEDULING MATRIX</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl relative overflow-hidden group">
+                            <div class="text-3xl mb-4">📊</div>
+                            <h4 class="text-lg font-black font-mono text-slate-100 mb-2 uppercase">Predictive Risk Analytics</h4>
+                            <p class="text-xs text-slate-400 leading-relaxed mb-6">Advanced algorithms continually evaluate progress, estimating potential bottlenecks and calculating real-time failure probabilities before they occur.</p>
+                            <span class="text-xs font-bold font-mono text-cyan-400">98% Accuracy</span>
+                        </div>
+                        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl relative overflow-hidden group">
+                            <div class="text-3xl mb-4">📈</div>
+                            <h4 class="text-lg font-black font-mono text-slate-100 mb-2 uppercase">Progressive Roadmaps</h4>
+                            <p class="text-xs text-slate-400 leading-relaxed mb-6">Breaks complex, multi-day goals into daily progressive milestones, scaling automatically from baseline-level to master execution levels.</p>
+                            <span class="text-xs font-bold font-mono text-emerald-400">Adaptive Scaling</span>
+                        </div>
+                        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl relative overflow-hidden group">
+                            <div class="text-3xl mb-4">⚡</div>
+                            <h4 class="text-lg font-black font-mono text-slate-100 mb-2 uppercase">Pomodoro Overdrive</h4>
+                            <p class="text-xs text-slate-400 leading-relaxed mb-6">Accelerate productivity with focus-sprint mechanisms that dynamically adapt to your pacing, keeping you aligned with aggressive target schedules.</p>
+                            <span class="text-xs font-bold font-mono text-amber-400">3.5x Output Boost</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="border-t border-slate-900 bg-slate-950 px-6 py-8 mt-24 text-center space-y-3">
+                <p class="text-xs text-slate-500 font-mono">
+                    &copy; 2026 DeadlineX Co. Secure autonomous delivery engines.
+                </p>
+            </footer>
+        </div>
+    </template>
+
+    <!-- 2. AUTHENTICATION PORTAL VIEW -->
+    <template x-if="page === 'auth'">
+        <div class="min-h-screen flex items-center justify-center p-6 bg-slate-950 relative selection:bg-cyan-500 selection:text-slate-900">
+            <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 via-transparent to-indigo-500/5 pointer-events-none"></div>
+            
+            <div class="w-full max-w-md bg-slate-900 border border-slate-800/80 p-8 rounded-3xl space-y-6 relative z-10">
+                <div class="text-center space-y-2">
+                    <span class="text-2xl">🛡️</span>
+                    <h3 class="text-xl font-black font-mono uppercase tracking-widest text-slate-100">LAUNCH DEADLINEX</h3>
+                    <p class="text-slate-500 text-xs">Verify credentials to initialize autonomous scheduler core.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">Security Email</label>
+                        <input x-model="authEmail" type="email" placeholder="e.g., developer@deadlinex.ai" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-colors">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">Access Keycode</label>
+                        <input x-model="authPassword" type="password" placeholder="••••••••" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-colors">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-[10px] font-mono">
+                    <label class="flex items-center gap-2 text-slate-500 cursor-pointer">
+                        <input type="checkbox" checked class="rounded border-slate-800 bg-slate-950 text-cyan-500 focus:ring-0">
+                        <span>Save Secure Token</span>
+                    </label>
+                    <a href="#" class="text-cyan-400 hover:text-cyan-300">Request Access?</a>
+                </div>
+
+                <button @click="login()" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold font-mono tracking-widest text-xs rounded-xl uppercase transition-all shadow-md active:scale-95">
+                    ✓ ESTABLISH CHANNEL
+                </button>
+
+                <div class="border-t border-slate-800 pt-4 text-center">
+                    <button @click="page = 'landing'" class="text-[10px] font-mono font-bold text-slate-500 hover:text-slate-400 uppercase tracking-wider">
+                        ← RETURN TO HOMEPAGE
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- 3. WEB WORKSPACE APPLICATION VIEW -->
+    <template x-if="page === 'app'">
+        <div class="min-h-screen bg-slate-950 text-slate-100 flex font-sans overflow-hidden">
+            
+            <!-- Sidebar -->
+            <aside class="h-screen bg-slate-900 border-r border-slate-850 flex flex-col z-40 flex-shrink-0 transition-all duration-300" :class="isSidebarOpen ? 'w-64' : 'w-0 overflow-hidden md:w-20'">
+                <!-- Sidebar Header -->
+                <div class="p-5 border-b border-slate-850 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl">🛡️</span>
+                        <div x-show="isSidebarOpen" class="transition-all">
+                            <h1 class="text-xs font-black font-mono tracking-widest text-cyan-400">DEADLINEX</h1>
+                            <p class="text-[8px] text-slate-500 font-mono tracking-wider uppercase">Active Security System</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="flex-grow p-4 space-y-1.5 overflow-y-auto">
+                    <button @click="tab = 'dashboard'" :class="tab === 'dashboard' ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'bg-transparent border-transparent hover:bg-slate-850 text-slate-400'" class="w-full flex items-center gap-3 px-3.5 py-3 text-xs font-mono font-bold tracking-wider rounded-xl transition-all border">
+                        <span>⚡</span>
+                        <span x-show="isSidebarOpen" class="uppercase">Dashboard</span>
+                    </button>
+                    <button @click="tab = 'planner'" :class="tab === 'planner' ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'bg-transparent border-transparent hover:bg-slate-850 text-slate-400'" class="w-full flex items-center gap-3 px-3.5 py-3 text-xs font-mono font-bold tracking-wider rounded-xl transition-all border">
+                        <span>🧠</span>
+                        <span x-show="isSidebarOpen" class="uppercase">AI Planner</span>
+                    </button>
+                    <button @click="tab = 'calendar'" :class="tab === 'calendar' ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'bg-transparent border-transparent hover:bg-slate-850 text-slate-400'" class="w-full flex items-center gap-3 px-3.5 py-3 text-xs font-mono font-bold tracking-wider rounded-xl transition-all border">
+                        <span>📅</span>
+                        <span x-show="isSidebarOpen" class="uppercase">Calendar</span>
+                    </button>
+                    <button @click="tab = 'analyzer'" :class="tab === 'analyzer' ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'bg-transparent border-transparent hover:bg-slate-850 text-slate-400'" class="w-full flex items-center gap-3 px-3.5 py-3 text-xs font-mono font-bold tracking-wider rounded-xl transition-all border">
+                        <span>📊</span>
+                        <span x-show="isSidebarOpen" class="uppercase">Risk Analyzer</span>
+                    </button>
+                    <button @click="tab = 'history'" :class="tab === 'history' ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'bg-transparent border-transparent hover:bg-slate-850 text-slate-400'" class="w-full flex items-center gap-3 px-3.5 py-3 text-xs font-mono font-bold tracking-wider rounded-xl transition-all border">
+                        <span>📜</span>
+                        <span x-show="isSidebarOpen" class="uppercase">Task History</span>
+                    </button>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="p-5 border-t border-slate-850 bg-slate-950/40">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-cyan-950 flex items-center justify-center border border-cyan-500/20 text-xs">
+                            👤
+                        </div>
+                        <div x-show="isSidebarOpen" class="truncate">
+                            <p class="text-[10px] font-mono font-bold truncate text-slate-300" x-text="user.name"></p>
+                            <span class="text-[8px] font-mono text-rose-400 uppercase tracking-widest">Premium Developer</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col h-screen overflow-hidden">
+                
+                <!-- Main Header -->
+                <header class="bg-slate-900/60 border-b border-slate-850/80 px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button @click="isSidebarOpen = !isSidebarOpen" class="p-2 bg-slate-850 border border-slate-800 rounded-xl text-slate-300">
+                            ☰
+                        </button>
+                        <div class="flex items-center gap-2 px-3 py-1 bg-cyan-950/40 border border-cyan-500/20 rounded-full">
+                            <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_8px_#22d3ee]"></span>
+                            <span class="text-[9px] font-bold font-mono tracking-widest text-cyan-400 uppercase">STATUS: SECURE (DEFCON 5)</span>
+                        </div>
+                    </div>
+
+                    <!-- Header Actions -->
+                    <div class="flex items-center gap-3">
+                        <!-- Notification Bell -->
+                        <div class="relative">
+                            <button @click="showNotifications = !showNotifications" class="p-2.5 bg-slate-850 hover:bg-slate-800 border border-slate-800 rounded-xl text-slate-300 flex items-center justify-center relative">
+                                🔔
+                                <span x-show="notifications.length > 0" class="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-[8px] font-bold text-slate-100 rounded-full flex items-center justify-center" x-text="notifications.length"></span>
+                            </button>
+                            <!-- Dropdown -->
+                            <div x-show="showNotifications" @click.away="showNotifications = false" class="absolute right-0 mt-3 w-80 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden z-50">
+                                <div class="p-3 border-b border-slate-800 bg-slate-950 flex justify-between items-center text-xs font-mono font-bold">
+                                    <span class="text-slate-300">RISK BROADCASTS</span>
+                                    <span class="text-[8px] bg-rose-950 text-rose-400 border border-rose-500/20 px-1 py-0.5 rounded">REAL-TIME</span>
+                                </div>
+                                <div class="max-h-60 overflow-y-auto divide-y divide-slate-800">
+                                    <template x-for="(n, i) in notifications" :key="i">
+                                        <div class="p-3 hover:bg-slate-850 text-left space-y-1">
+                                            <div class="flex items-center justify-between text-[10px]">
+                                                <span class="font-bold text-rose-400" x-text="n.type"></span>
+                                                <span class="text-slate-500" x-text="n.time"></span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-300" x-text="n.message"></p>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Logout Button -->
+                        <button @click="logout()" class="px-3.5 py-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 text-xs font-bold font-mono tracking-wider rounded-xl uppercase transition-all">
+                            ✕ EXIT
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Workspace Frame -->
+                <main class="flex-grow overflow-y-auto p-6 md:p-8 bg-slate-950">
+                    
+                    <!-- TAB 1: DASHBOARD -->
+                    <div x-show="tab === 'dashboard'" class="space-y-6">
+                        <!-- Title & Add Form -->
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-900 pb-5">
+                            <div>
+                                <h1 class="text-xl font-black font-mono uppercase tracking-wide">Tasks Matrix Workspace</h1>
+                                <p class="text-slate-500 text-xs mt-0.5">Manage tasks, update progress milestones, and set risk levels.</p>
+                            </div>
+                            <button @click="showAddModal = true" class="px-4 py-2.5 bg-cyan-500 text-slate-950 text-xs font-bold font-mono tracking-widest uppercase rounded-xl hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all">
+                                ➕ CREATE TACTICAL TASK
+                            </button>
+                        </div>
+
+                        <!-- Active Task Cards Grid -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <!-- Left: Tasks List -->
+                            <div class="lg:col-span-2 space-y-4">
+                                <h3 class="text-xs font-black font-mono text-slate-400 uppercase tracking-wider">&gt; ACTIVE ROADMAP LIST</h3>
+                                
+                                <div class="space-y-3">
+                                    <template x-for="task in tasks" :key="task.id">
+                                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4 relative overflow-hidden">
+                                            <!-- Ribbon status -->
+                                            <div class="absolute top-0 right-0 h-1 w-24" :class="task.progress === 100 ? 'bg-emerald-500' : (task.daysRemaining <= 3 ? 'bg-rose-500 animate-pulse' : 'bg-cyan-500')"></div>
+
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <div class="flex items-center gap-2 flex-wrap">
+                                                        <span class="text-xs font-bold font-mono text-slate-200" x-text="task.title"></span>
+                                                        <span class="text-[8px] font-mono px-2 py-0.5 rounded uppercase font-black" :class="task.category === 'Work' ? 'bg-cyan-950 text-cyan-400 border border-cyan-500/20' : 'bg-purple-950 text-purple-400 border border-purple-500/20'" x-text="task.category"></span>
+                                                    </div>
+                                                    <p class="text-[11px] text-slate-400 mt-1" x-text="task.description"></p>
+                                                </div>
+                                                <button @click="deleteTask(task.id)" class="text-slate-500 hover:text-rose-400 transition-colors text-xs font-mono">✕ DELETE</button>
+                                            </div>
+
+                                            <!-- Progress Slider -->
+                                            <div class="space-y-1.5">
+                                                <div class="flex justify-between items-center text-[10px] font-mono text-slate-400">
+                                                    <span>PROGRESS TRACKER</span>
+                                                    <span class="font-black" x-text="task.progress + '%'"></span>
+                                                </div>
+                                                <input type="range" min="0" max="100" x-model="task.progress" @input="saveTasks()" class="w-full accent-cyan-500 bg-slate-950 h-2 rounded-lg cursor-pointer">
+                                            </div>
+
+                                            <div class="flex justify-between items-center pt-2 border-t border-slate-850 text-[10px] font-mono">
+                                                <div class="flex items-center gap-1.5 text-slate-400">
+                                                    <span>⏳</span>
+                                                    <span x-text="task.daysRemaining + ' days remaining'"></span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-slate-500">Risk Factor:</span>
+                                                    <span class="font-bold" :class="task.daysRemaining <= 3 && task.progress < 50 ? 'text-rose-400 glow-rose animate-pulse' : 'text-emerald-400'" x-text="task.daysRemaining <= 3 && task.progress < 50 ? 'CRITICAL SLIPPAGE' : 'STABLE'"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Right: Analytics Summary & Quick Metrics -->
+                            <div class="lg:col-span-1 space-y-6">
+                                <h3 class="text-xs font-black font-mono text-slate-400 uppercase tracking-wider">&gt; REALTIME WORKLOAD TELEMETRY</h3>
+
+                                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                                    <h4 class="text-xs font-bold font-mono text-slate-300 uppercase">System Coefficients</h4>
+                                    
+                                    <div class="space-y-3 divide-y divide-slate-850">
+                                        <div class="flex justify-between py-2 text-xs font-mono">
+                                            <span class="text-slate-500">Secure Deadlines</span>
+                                            <span class="text-emerald-400 font-bold" x-text="tasks.filter(t => t.progress === 100).length"></span>
+                                        </div>
+                                        <div class="flex justify-between py-2 text-xs font-mono">
+                                            <span class="text-slate-500">Active Pipeline</span>
+                                            <span class="text-cyan-400 font-bold" x-text="tasks.filter(t => t.progress < 100).length"></span>
+                                        </div>
+                                        <div class="flex justify-between py-2 text-xs font-mono">
+                                            <span class="text-slate-500">Threat Level</span>
+                                            <span class="font-bold" :class="tasks.some(t => t.daysRemaining <= 3 && t.progress < 50) ? 'text-rose-400' : 'text-emerald-400'" x-text="tasks.some(t => t.daysRemaining <= 3 && t.progress < 50) ? 'DEFCON 1 (HIGH)' : 'DEFCON 5 (STABLE)'"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: AI PLANNER -->
+                    <div x-show="tab === 'planner'" class="space-y-6">
+                        <div class="space-y-2 border-b border-slate-850 pb-5">
+                            <span class="text-[9px] font-mono tracking-widest text-cyan-400 font-bold uppercase">&gt; AUTOMATION MODULE</span>
+                            <h2 class="text-2xl font-black font-mono uppercase tracking-wide">Autonomous AI Planner Matrix</h2>
+                            <p class="text-slate-500 text-xs leading-relaxed">Formulate target objectives. Decompose deep multi-day targets into progressive tactical milestones instantly.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <!-- Input Panel -->
+                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4 h-fit">
+                                <h4 class="text-xs font-bold font-mono text-slate-300 uppercase tracking-wider">AI Objective Scope</h4>
+                                
+                                <div class="space-y-3">
+                                    <div class="space-y-1">
+                                        <label class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">Target Objective</label>
+                                        <input x-model="aiObjective" type="text" placeholder="e.g., Build Rust Server with Auth" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-500">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">Complexity Mode</label>
+                                        <select class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300">
+                                            <option>DEFCON HIGH-INTENSITY SPRINT (1 DAY)</option>
+                                            <option>STANDARD EXCURSION (3 DAYS)</option>
+                                            <option>DEEP DIVE CADENCE (7 DAYS)</option>
+                                        </select>
+                                    </div>
+                                    <button @click="generateBlueprint()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold font-mono tracking-widest text-[9px] rounded-xl uppercase transition-all shadow-md">
+                                        ⚡ GENERATE AUTONOMOUS BLUEPRINT
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Output Milestones -->
+                            <div class="lg:col-span-2 space-y-4">
+                                <h4 class="text-xs font-bold font-mono tracking-wider text-slate-400 uppercase">ACTIVE COGNITIVE ROADMAP BLUEPRINT</h4>
+                                
+                                <div class="space-y-3">
+                                    <template x-for="(step, i) in plannerBlueprint" :key="i">
+                                        <div class="bg-slate-900/60 border border-slate-850 p-4 rounded-xl flex items-start gap-4">
+                                            <span class="text-lg font-black font-mono text-cyan-400" x-text="step.step"></span>
+                                            <div class="flex-grow space-y-1.5">
+                                                <div class="flex justify-between items-center">
+                                                    <h5 class="text-xs font-bold font-mono text-slate-200" x-text="step.title"></h5>
+                                                    <span class="text-[8px] font-mono bg-emerald-950/40 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded" x-text="step.state"></span>
+                                                </div>
+                                                <p class="text-[10px] text-slate-400 leading-normal" x-text="step.desc"></p>
+                                                <div class="flex items-center gap-3 pt-2">
+                                                    <div class="flex-grow bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                                                        <div class="bg-cyan-400 h-full" :style="'width: ' + step.progress + '%'"></div>
+                                                    </div>
+                                                    <span class="text-[9px] font-mono text-slate-500" x-text="step.duration"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: CALENDAR -->
+                    <div x-show="tab === 'calendar'" class="space-y-6">
+                        <div class="space-y-1 border-b border-slate-850 pb-5">
+                            <h2 class="text-2xl font-black font-mono uppercase tracking-wide">Tactical Secure Calendar</h2>
+                            <p class="text-slate-500 text-xs">Calendar tracking interface loaded with active delivery dates.</p>
+                        </div>
+
+                        <!-- Mini Calendar grid -->
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                                <span class="text-xs font-black font-mono uppercase text-cyan-400">June 2026</span>
+                                <div class="flex gap-2">
+                                    <button class="px-2.5 py-1 bg-slate-850 border border-slate-800 rounded text-xs font-mono">&lt;</button>
+                                    <button class="px-2.5 py-1 bg-slate-850 border border-slate-800 rounded text-xs font-mono">&gt;</button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-7 gap-2 text-center text-[10px] font-mono text-slate-500 font-bold uppercase">
+                                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                            </div>
+
+                            <div class="grid grid-cols-7 gap-2 font-mono">
+                                <!-- Dummy days leading to June -->
+                                <template x-for="day in Array.from({length: 31}, (_, i) => i + 1)">
+                                    <div class="aspect-square bg-slate-950/60 border border-slate-850 rounded-xl p-2 flex flex-col justify-between hover:border-cyan-500/40 transition-colors cursor-pointer group">
+                                        <span class="text-[10px] font-bold text-slate-400" x-text="day"></span>
+                                        <!-- Task dot for some days -->
+                                        <div class="flex justify-center gap-1">
+                                            <template x-if="[5, 12, 19, 26].includes(day)">
+                                                <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></span>
+                                            </template>
+                                            <template x-if="[15].includes(day)">
+                                                <span class="w-1.5 h-1.5 bg-rose-400 rounded-full animate-ping"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: RISK ANALYZER -->
+                    <div x-show="tab === 'analyzer'" class="space-y-6">
+                        <div class="space-y-2 border-b border-slate-850 pb-5">
+                            <span class="text-[9px] font-mono tracking-widest text-rose-400 font-bold uppercase">&gt; RISK METRIC ANALYZER</span>
+                            <h2 class="text-2xl font-black font-mono uppercase tracking-wide">Predictive Risk Analyzer Dashboard</h2>
+                            <p class="text-slate-500 text-xs leading-relaxed">Continuous automated tracking checking milestone progress velocity against expected delivery dates.</p>
+                        </div>
+
+                        <!-- Risk Stats cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
+                                <span class="text-[9px] font-mono text-slate-500 uppercase block">SLIPPAGE INDEX</span>
+                                <p class="text-2xl font-black font-mono text-amber-400">14.8%</p>
+                                <span class="inline-block text-[8px] bg-slate-950 px-2 py-0.5 rounded text-slate-400">STABLE CADENCE</span>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
+                                <span class="text-[9px] font-mono text-slate-500 uppercase block">BACKLOG WORKLOAD CAPACITY</span>
+                                <p class="text-2xl font-black font-mono text-rose-400">3.5 hrs/day</p>
+                                <span class="inline-block text-[8px] bg-slate-950 px-2 py-0.5 rounded text-rose-300">DEFCON 1 LEVEL</span>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
+                                <span class="text-[9px] font-mono text-slate-500 uppercase block">COMPLETION COEFFICIENT</span>
+                                <p class="text-2xl font-black font-mono text-cyan-400">91.2%</p>
+                                <span class="inline-block text-[8px] bg-slate-950 px-2 py-0.5 rounded text-slate-400">EVALUATING SESSIONS</span>
+                            </div>
+                        </div>
+
+                        <!-- Active high risk tasks -->
+                        <div class="space-y-4">
+                            <h3 class="text-xs font-black font-mono text-slate-400 uppercase tracking-wider">&gt; CRITICAL EXPOSURE WARNINGS</h3>
+                            
+                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
+                                <div class="flex items-center gap-4 text-xs font-mono">
+                                    <span class="text-xl">🚨</span>
+                                    <div>
+                                        <h4 class="font-bold text-rose-400">IMMINENT SLIPPAGE WARNING DETECTED</h4>
+                                        <p class="text-[10px] text-slate-400">Task "Math Exam Prep" has 1 day remaining and is only 30% complete. Failure risk coefficient has spiked to 85.2%.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button @click="triggerRescue()" class="px-4 py-2.5 bg-rose-500 text-slate-950 text-xs font-bold font-mono tracking-wider uppercase rounded-xl">
+                                        🚨 INITIATE EMERGENCY SPRINT
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: TASK HISTORY -->
+                    <div x-show="tab === 'history'" class="space-y-6">
+                        <div class="space-y-2 border-b border-slate-850 pb-5">
+                            <span class="text-[9px] font-mono tracking-widest text-indigo-400 font-bold uppercase">&gt; ARCHIVED HISTORIC RECORDS</span>
+                            <h2 class="text-2xl font-black font-mono uppercase tracking-wide">Secure Task History Archive</h2>
+                            <p class="text-slate-500 text-xs">A comprehensive historic log of completed roadmaps and secure timelines.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4 divide-y divide-slate-850">
+                            <div class="py-3 flex justify-between items-center">
+                                <div>
+                                    <h4 class="text-xs font-bold font-mono text-slate-200">Ktor Microservice Deploy</h4>
+                                    <p class="text-[10px] text-slate-500 font-mono">Completed: June 25, 2026 &bull; ID: #T-98124</p>
+                                </div>
+                                <span class="text-[8px] bg-emerald-950 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-xl uppercase font-mono font-bold">✓ SECURED</span>
+                            </div>
+                            <div class="py-3 flex justify-between items-center">
+                                <div>
+                                    <h4 class="text-xs font-bold font-mono text-slate-200">Database Schema Normalization</h4>
+                                    <p class="text-[10px] text-slate-500 font-mono">Completed: June 22, 2026 &bull; ID: #T-98015</p>
+                                </div>
+                                <span class="text-[8px] bg-emerald-950 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-xl uppercase font-mono font-bold">✓ SECURED</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </main>
+            </div>
+            
+            <!-- Create Task Modal -->
+            <div x-show="showAddModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-6 z-50">
+                <div class="w-full max-w-md bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
+                    <h3 class="text-md font-black font-mono uppercase tracking-wider text-slate-100">CREATE TACTICAL TARGET</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-mono uppercase text-slate-500 font-bold">Task Title</label>
+                            <input x-model="newTaskTitle" type="text" placeholder="e.g., Math Exam Prep" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-200 focus:outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-mono uppercase text-slate-500 font-bold">Description</label>
+                            <input x-model="newTaskDesc" type="text" placeholder="Chapters 3-6 review" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-200 focus:outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-mono uppercase text-slate-500 font-bold">Category</label>
+                                <select x-model="newTaskCategory" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300">
+                                    <option>Work</option>
+                                    <option>Study</option>
+                                    <option>Personal</option>
+                                    <option>Health</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-mono uppercase text-slate-500 font-bold">Days Remaining</label>
+                                <input x-model.number="newTaskDays" type="number" min="1" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-200 focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-4 font-mono text-[10px]">
+                        <button @click="showAddModal = false" class="flex-1 py-3 bg-slate-850 hover:bg-slate-800 text-slate-400 font-bold uppercase rounded-xl">CANCEL</button>
+                        <button @click="addTask()" class="flex-1 py-3 bg-cyan-500 text-slate-950 font-bold uppercase rounded-xl">CREATE TARGET</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </template>
+
+    <script>
+        function appState() {
+            return {
+                page: 'landing',
+                tab: 'dashboard',
+                isSidebarOpen: true,
+                showNotifications: false,
+                showAddModal: false,
+                
+                authEmail: '',
+                authPassword: '',
+                
+                user: {
+                    name: 'Premium Developer',
+                    email: 'yash@deadlinex.ai'
+                },
+
+                tasks: [
+                    { id: 1, title: 'Math Exam Prep', description: 'Chapters 3-6 review and progressive test simulations.', category: 'Study', daysRemaining: 1, progress: 30 },
+                    { id: 2, title: 'Ktor Microservice Deploy', description: 'Containerize and publish the primary task endpoints.', category: 'Work', daysRemaining: 5, progress: 100 },
+                    { id: 3, title: 'Calendar Integration Sync', description: 'Implement OAuth tokens and bi-directional callback routers.', category: 'Work', daysRemaining: 3, progress: 60 },
+                    { id: 4, title: 'Cardio Workload Training', description: 'High-intensity intervals for secure fitness pacing.', category: 'Health', daysRemaining: 7, progress: 10 }
+                ],
+
+                notifications: [
+                    { type: 'SYSTEM SUCCESS', message: 'DeadlineX AI Core successfully established secure channel.', time: '5m ago' },
+                    { type: 'RISK WARN', message: 'Math Exam Prep backlog pressure is elevated. Consider starting Chapter 3 review.', time: '1h ago' }
+                ],
+
+                newTaskTitle: '',
+                newTaskDesc: '',
+                newTaskCategory: 'Work',
+                newTaskDays: 3,
+
+                aiObjective: '',
+                plannerBlueprint: [
+                    { step: "01", title: "Project Scoping & Schema Normalization", desc: "Define entities and primary tables for database synchronizer.", duration: "3h", state: "COMPLETED", progress: 100 },
+                    { step: "02", title: "Implement Ktor Router & Callbacks", desc: "Build endpoints for secure OAuth parameters verification.", duration: "5h", state: "IN PROGRESS", progress: 40 },
+                    { step: "03", title: "Setup Socket.io Live Stream Client", desc: "Establish low-latency pipeline to transmit delivery threats.", duration: "4h", state: "PENDING", progress: 0 },
+                    { step: "04", title: "End-To-End Screenshot Validation", desc: "Execute automated local Roborazzi unit verification tests.", duration: "2h", state: "PENDING", progress: 0 }
+                ],
+
+                init() {
+                    // Load state from localStorage if available
+                    const savedTasks = localStorage.getItem('web_deadlinex_tasks');
+                    if (savedTasks) {
+                        try {
+                            this.tasks = JSON.parse(savedTasks);
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                    const savedUser = localStorage.getItem('deadlinex_auth_user');
+                    if (savedUser) {
+                        try {
+                            const parsed = JSON.parse(savedUser);
+                            this.user = parsed;
+                            this.page = 'app';
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                },
+
+                login() {
+                    if (!this.authEmail) {
+                        alert('Please enter your email.');
+                        return;
+                    }
+                    this.user.name = this.authEmail.split('@')[0];
+                    this.user.email = this.authEmail;
+                    localStorage.setItem('deadlinex_auth_user', JSON.stringify(this.user));
+                    this.page = 'app';
+                    this.tab = 'dashboard';
+                },
+
+                logout() {
+                    localStorage.removeItem('deadlinex_auth_user');
+                    this.page = 'landing';
+                },
+
+                saveTasks() {
+                    localStorage.setItem('web_deadlinex_tasks', JSON.stringify(this.tasks));
+                },
+
+                addTask() {
+                    if (!this.newTaskTitle) {
+                        alert('Please fill in the title');
+                        return;
+                    }
+                    const newTaskObj = {
+                        id: Date.now(),
+                        title: this.newTaskTitle,
+                        description: this.newTaskDesc,
+                        category: this.newTaskCategory,
+                        daysRemaining: this.newTaskDays,
+                        progress: 0
+                    };
+                    this.tasks.push(newTaskObj);
+                    this.saveTasks();
+                    this.showAddModal = false;
+                    
+                    // Reset input
+                    this.newTaskTitle = '';
+                    this.newTaskDesc = '';
+                    this.newTaskCategory = 'Work';
+                    this.newTaskDays = 3;
+                },
+
+                deleteTask(id) {
+                    this.tasks = this.tasks.filter(t => t.id !== id);
+                    this.saveTasks();
+                },
+
+                generateBlueprint() {
+                    if (!this.aiObjective) {
+                        alert('Please fill in the target objective.');
+                        return;
+                    }
+                    this.plannerBlueprint = [
+                        { step: "01", title: "Initialize Scope: " + this.aiObjective, desc: "Analyze technical landscape and identify prerequisites.", duration: "2h", state: "COMPLETED", progress: 100 },
+                        { step: "02", title: "Structural Scaffold Blueprint", desc: "Formulate database migrations and API schemas.", duration: "4h", state: "IN PROGRESS", progress: 25 },
+                        { step: "03", title: "Target Module Synthesis", desc: "Build functional routes, handlers, and persistence interfaces.", duration: "8h", state: "PENDING", progress: 0 },
+                        { step: "04", title: "Validation & Production Deployment", desc: "Ensure regression-free delivery and configure CI pipelines.", duration: "3h", state: "PENDING", progress: 0 }
+                    ];
+                    alert('AI Roadmap generated successfully for: ' + this.aiObjective);
+                },
+
+                triggerRescue() {
+                    this.notifications.unshift({
+                        type: 'CRITICAL OVERDRIVE',
+                        message: 'Emergency sprint protocol active. Target Math Exam Prep focus session running.',
+                        time: 'Just now'
+                    });
+                    this.tasks.forEach(t => {
+                        if (t.id === 1) {
+                            t.progress = 50;
+                        }
+                    });
+                    this.saveTasks();
+                    alert('EMERGENCY RESCUE SPRINT COMMENCED: Milestones optimized for Math Exam Prep.');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

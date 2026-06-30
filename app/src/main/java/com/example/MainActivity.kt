@@ -40,9 +40,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             var isDarkTheme by remember { mutableStateOf(true) }
             MyApplicationTheme(darkTheme = isDarkTheme) {
-                var currentTab by remember { mutableStateOf(0) }
-                var selectedTaskForPlanner by remember { mutableStateOf<Task?>(null) }
-                var selectedTaskForEmergency by remember { mutableStateOf<Task?>(null) }
+                var isWebPortalMode by remember { mutableStateOf(false) }
+
+                if (isWebPortalMode) {
+                    WebViewScreen(onBack = { isWebPortalMode = false })
+                } else {
+                    var currentTab by remember { mutableStateOf(0) }
+                    var selectedTaskForPlanner by remember { mutableStateOf<Task?>(null) }
+                    var selectedTaskForEmergency by remember { mutableStateOf<Task?>(null) }
 
                 val snackbarHostState = remember { SnackbarHostState() }
                 val uiMessage by viewModel.uiMessage.collectAsState()
@@ -75,7 +80,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "DEADLINE GUARDIAN AI",
+                                        text = "DEADLINEX",
                                         color = MaterialTheme.colorScheme.onSurface,
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Black,
@@ -89,6 +94,16 @@ class MainActivity : ComponentActivity() {
                                 titleContentColor = MaterialTheme.colorScheme.onSurface
                             ),
                             actions = {
+                                IconButton(
+                                    onClick = { isWebPortalMode = true },
+                                    modifier = Modifier.testTag("web_portal_toggle_button")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Language,
+                                        contentDescription = "Switch to Web Portal",
+                                        tint = if (isDarkTheme) NeonCyan else BentoIndigoBg
+                                    )
+                                }
                                 IconButton(
                                     onClick = { isDarkTheme = !isDarkTheme },
                                     modifier = Modifier.testTag("theme_toggle_button")
@@ -341,6 +356,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+            }
             }
         }
     }

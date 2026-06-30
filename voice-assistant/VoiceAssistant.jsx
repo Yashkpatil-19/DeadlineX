@@ -171,7 +171,7 @@ const VoiceAssistant = ({ userId = "default-user" }) => {
             {/* Title Block */}
             <div className="text-center mb-6">
                 <h3 className="text-lg font-bold text-slate-100 tracking-wider uppercase font-mono">
-                    Deadline Guardian
+                    DeadlineX
                 </h3>
                 <p className="text-xs text-cyan-400 font-semibold tracking-wider uppercase">
                     AI Voice Assistant
